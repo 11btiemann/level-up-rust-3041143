@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 enum Card {
     Ace,
     Two,
@@ -14,6 +14,31 @@ enum Card {
     Jack,
     Queen,
     King,
+}
+
+trait Value {
+    fn value(&self) -> usize;
+}
+
+impl Value for Card {
+    fn value(&self) -> usize {
+        use Card::*;
+        match self {
+            Ace => 11,
+            Two => 2,
+            Three => 3,
+            Four => 4,
+            Five => 5,
+            Six => 6,
+            Seven => 7,
+            Eight => 8,
+            Nine => 9,
+            Jack => 10,
+            Queen => 10,
+            King => 10,
+            _ => 0
+        }
+    }
 }
 
 struct Hand {
@@ -32,8 +57,14 @@ impl Hand {
     }
 
     fn value(&self) -> usize {
-        // TODO: implement this method
-        0 
+        let mut value = 0;
+        for card in &self.cards {
+            value += card.value();
+            if value > 21 && *card == Card::Ace {
+                value -= 10;
+            }
+        }
+        value
     }
 
     fn is_loosing_hand(&self) -> bool {
