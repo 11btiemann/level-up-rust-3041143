@@ -1,11 +1,25 @@
-fn unique(a: Vec<i32>) -> Vec<i32> {
-    todo!()
-}
+// fn unique(a: Vec<i32>) -> Vec<i32> {
+//     let mut output: Vec<i32> = vec![];
+
+//     for value in &a {
+//         if !output.contains(value) {
+//             output.push(*value);
+//         }
+//     }
+//     output
+// }
 
 // advanced 1: use generic types
-// fn unique(a: Vec<T>) -> Vec<T> {
-//     todo!();
-// }
+fn unique<T: Ord + Copy>(a: Vec<T>) -> Vec<T> {
+    let mut output: Vec<T> = vec![];
+
+    for value in &a {
+        if !output.contains(value) {
+            output.push(*value);
+        }
+    }
+    output
+}
 
 // advanced 2: keep items in order
 // fn unique(a: Iterable<T>) -> Vec<T> {
@@ -25,7 +39,7 @@ fn main() {
 
 #[test]
 fn empty_list() {
-    let input = vec![];
+    let input: Vec<i32> = vec![];
     let expected_output = vec![];
     let actual_output = unique(input);
     assert_eq!(actual_output, expected_output);
