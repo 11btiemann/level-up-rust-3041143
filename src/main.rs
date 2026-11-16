@@ -1,5 +1,11 @@
+use chrono::NaiveDate;
+
 fn weeks_between(a: &str, b: &str) -> i32 {
-    todo!()
+    let date_a: NaiveDate = a.parse().expect("Invalid date format");
+    let date_b: NaiveDate = b.parse().expect("Invalid date format");
+
+    let difference = date_b - date_a;
+    difference.num_weeks().try_into().unwrap()
 }
 
 fn main() {
