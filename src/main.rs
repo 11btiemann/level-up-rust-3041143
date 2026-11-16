@@ -5,11 +5,27 @@ struct Isbn {
     digits: Vec<u8>,
 }
 
+#[derive(Debug)]
+enum IsbnErr {
+    TooShort,
+    TooLong,
+    WrongCheckDigit,
+}
+
 impl FromStr for Isbn {
-    type Err = (); // TODO: replace with appropriate type
+    type Err = IsbnErr;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!();        
+        let no_hyphens = s.replace("-", "");
+        if no_hyphens.len() < 13 { return Err(IsbnErr::TooShort) };
+        if no_hyphens.len() > 13 { return Err(IsbnErr::TooLong) };
+
+        let digits: Vec<u8> = no_hyphens.chars().map(|c| c.to_digit(10).unwrap() as u8).collect();
+        if calculate_check_digit(&digits[..12]) != digits[12] {
+            return Err(IsbnErr::WrongCheckDigit);
+        }
+
+        Ok(Isbn { raw: s.to_string(), digits })
     }
 }
 
@@ -21,13 +37,17 @@ impl std::fmt::Display for Isbn {
 
 // https://en.wikipedia.org/wiki/International_Standard_Book_Number#ISBN-13_check_digit_calculation
 fn calculate_check_digit(digits: &[u8]) -> u8 {
-    todo!()
+    let sum = digits.iter().enumerate().map(|(i, &x)| if i % 2 == 0 { x } else { x * 3 }).sum::<u8>();
+    (10 - (sum % 10)) % 10
 }
 
 fn main() {
-    let rust_in_action: Isbn = "978-3-16-148410-0".parse().unwrap();
-
-    println!("Rust in Action's ISBN-13 ({})is valid!", rust_in_action);
+    match "978-3-16-148410-0".parse::<Isbn>() {
+        Ok(rust_in_action) => println!("Rust in Action's ISBN-13 ({})is valid, digits: {}!",
+            rust_in_action, 
+            rust_in_action.digits.iter().map(|d| (d + b'0') as char).collect::<String>()),
+        Err(e) => println!("Error parsing ISBN: {:?}", e),
+    }
 }
 
 #[test]
