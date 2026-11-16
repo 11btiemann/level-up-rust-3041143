@@ -2,7 +2,11 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
-struct Rgb; // TODO: design data structure
+struct Rgb {
+    r: u8,
+    g: u8,
+    b: u8,
+}
 
 trait RgbChannels {
     fn r(&self) -> u8;
@@ -13,11 +17,37 @@ trait RgbChannels {
 }
 
 impl RgbChannels for Rgb {
-    // TODO: implement trait
+    fn r(&self) -> u8 { self.r }
+    fn g(&self) -> u8 { self.g }
+    fn b(&self) -> u8 { self.b }
+}
+
+#[derive(PartialEq, Debug, Clone)]
+enum RgbErr {
+    NoLeadingHash,
+    InvalidLength,
+    NotHexCode,
+}
+
+fn from_hex(s: &str) -> Result<u8, RgbErr> {
+    u8::from_str_radix(s, 16).map_err(|_| RgbErr::NotHexCode)
 }
 
 impl FromStr for Rgb {
-    // TODO: implement trait
+    type Err = RgbErr;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if &s[0..1] != "#" {
+            return Err(RgbErr::NoLeadingHash);
+        }
+        if s.len() != 7 {
+            return Err(RgbErr::InvalidLength);
+        }
+        let r: u8 = from_hex(&s[1..3])?;
+        let g: u8 = from_hex(&s[3..5])?;
+        let b: u8 = from_hex(&s[5..7])?;
+        Ok(Rgb{ r, g, b })
+    }
 }
 
 impl Display for Rgb {
@@ -27,7 +57,7 @@ impl Display for Rgb {
 }
 
 fn main() {
-    // 
+    println!("RGB: {}", "#aabbcc".parse::<Rgb>().unwrap());
 }
 
 #[test]
@@ -42,32 +72,32 @@ fn every_color() {
 }
 
 #[test]
-#[should_panic]
-fn too_short () {
-    let _: Rgb = "1234".parse().unwrap();
+fn too_short() {
+    let result: Result<Rgb, _> = "#1234".parse();
+    assert_eq!(result, Err(RgbErr::InvalidLength));
 }
 
 #[test]
-#[should_panic]
-fn not_a_hex_code () {
-    let _: Rgb = "?".parse().unwrap();
+fn not_a_hex_code() {
+    let result: Result<Rgb, _> = "#0000?0".parse();
+    assert_eq!(result, Err(RgbErr::NotHexCode));
 }
 
 #[test]
-#[should_panic]
-fn invalid_literals () {
-    let _: Rgb = "?".parse().unwrap();
+fn invalid_literals() {
+    let result: Result<Rgb, _> = "#0000?0".parse();
+    assert_eq!(result, Err(RgbErr::NotHexCode));
 }
 
 #[test]
-#[should_panic]
 fn no_leading_hash() {
-    let _: Rgb = "aabbcc".parse().unwrap();
+    let result: Result<Rgb, _> = "aabbcc".parse();
+    assert_eq!(result, Err(RgbErr::NoLeadingHash));
 }
 
 #[test]
-#[should_panic]
 fn out_of_bounds() {
-    let _: Rgb = "00gg00".parse().unwrap();
+    let result: Result<Rgb, _> = "#00gg00".parse();
+    assert_eq!(result, Err(RgbErr::NotHexCode));
 }
 
