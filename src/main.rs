@@ -10,6 +10,7 @@ enum IsbnErr {
     TooShort,
     TooLong,
     WrongCheckDigit,
+    IllegalCharacter
 }
 
 impl FromStr for Isbn {
@@ -17,6 +18,9 @@ impl FromStr for Isbn {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let no_hyphens = s.replace("-", "");
+        if !no_hyphens.chars().all(|c| c.is_ascii_digit()) { 
+            return Err(IsbnErr::IllegalCharacter) 
+        }
         if no_hyphens.len() < 13 { return Err(IsbnErr::TooShort) };
         if no_hyphens.len() > 13 { return Err(IsbnErr::TooLong) };
 
@@ -67,4 +71,14 @@ fn can_correctly_calculate_check_digits() {
 #[test]
 fn rust_in_action() {
     let _: Isbn = "978-3-16-148410-0".parse().unwrap();
+}
+
+#[test]
+fn test_for_illegal_character() {
+    let result: Result<Isbn, _> = "978-x-16-148410-0".parse();
+    assert!(result.is_err());
+    match result {
+        Err(IsbnErr::IllegalCharacter) => (),
+        _ => panic!("Expected IllegalCharacter error"),
+    }
 }
