@@ -1,9 +1,20 @@
 fn sum_with_missing(numbers: Vec<Option<i32>>) -> i32 {
-    todo!();
+    let mut sum = 0;
+    for element in numbers.iter() {
+        if let Some(number) = element {
+            sum += number
+        }
+    }
+    sum
+    // numbers
+    //     .iter()
+    //     .map(|x| x.unwrap_or_default())
+    //     .sum()
 }
 
 fn main() {
-    println!("");
+    let sum = sum_with_missing(vec![None, Some(1), Some(5)]);
+    println!("Sum is {}", sum);
 }
 
 
