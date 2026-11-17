@@ -3,14 +3,20 @@ use chrono::NaiveDate;
 /// Parses a string that represents a date. When a date
 /// is unable to be determined, return `None`. 
 fn flexible_date_parse(text: &str) -> Option<NaiveDate> {
-    todo!();
+    NaiveDate::parse_from_str(text, "%Y-%m-%d").ok().or_else(
+        || NaiveDate::parse_from_str(text, "%Y/%b/%d").ok().or_else(
+            || NaiveDate::parse_from_str(text, "%d.%B.%Y").ok().or_else(
+                || NaiveDate::parse_from_str(text, "%b.%d.%Y").ok()
+            )
+        )
+    )
 }
 
 fn main() {
     let dates = [
         "2010-12-11",
         "1999/Mar/02",
-        "01.Mar.2021",
+        "01.July.2021",
         "Mar.05.2021",
         "not a date",
     ];
@@ -34,6 +40,11 @@ fn ymd_slash() {
 #[test]
 fn dmy_dot() {
     assert_eq!(flexible_date_parse("01.Mar.2021"), Some(NaiveDate::from_ymd(2021, 3, 1)))
+}
+
+#[test]
+fn dmy_long_dot() {
+    assert_eq!(flexible_date_parse("13.July.2021"), Some(NaiveDate::from_ymd(2021, 7, 13)))
 }
 
 #[test]
